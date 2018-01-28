@@ -37,7 +37,7 @@ func BenchmarkTest(b *testing.B) {
 		b.Fatalf("Failed to create index %v\n", err)
 	}
 	for n := 0; n < b.N; n++ {
-		idx.GetLine(int64(n % 10))
+		idx.GetLineBytes(int64(n % 10))
 	}
 }
 
@@ -51,7 +51,7 @@ func BenchmarkConcurency(b *testing.B) {
 		wg.Add(1)
 		go func() {
 			for n := 0; n < b.N; n++ {
-				idx.GetLine(int64(n % 10))
+				idx.GetLineBytes(int64(n % 10))
 			}
 			wg.Done()
 		}()

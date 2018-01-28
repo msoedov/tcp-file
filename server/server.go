@@ -59,13 +59,13 @@ func do(idx *indexer.Indexer, conn net.Conn) {
 			if errP != nil {
 				conn.Write(ErrReply)
 			} else {
-				str, err := idx.GetLine(line)
+				payload, err := idx.GetLineBytes(line)
 				if err != nil {
 					conn.Write(ErrReply)
 					continue
 				}
-				conn.Write(OkReply)
-				conn.Write([]byte(str))
+				// Avoid extra mem alocation
+				conn.Write(append(OkReply, payload...))
 			}
 		}
 	}

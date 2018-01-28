@@ -35,22 +35,28 @@ func NewIndexer(indexPath, sourcePath string) *Indexer {
 	return new(Indexer).init(indexPath, sourcePath)
 }
 
+// GetLine
 func (self *Indexer) GetLine(line int64) (string, error) {
+	payload, err := self.GetLineBytes(line)
+	return string(payload), err
+}
+
+// GetLineBytes
+func (self *Indexer) GetLineBytes(line int64) ([]byte, error) {
 	if line < 0 {
-		return "", ouchErr
+		return []byte{}, ouchErr
 	}
 	self.IoLock.Lock()
 	defer self.IoLock.Unlock()
 	from := offsetForLine(line-1, self.indexFile)
 	to := offsetForLine(line, self.indexFile)
 	if from >= to {
-		return "", offsetErr
+		return []byte{}, offsetErr
 	}
-	bs := make([]byte, to-from)
+	payload := make([]byte, to-from)
 	self.sourceFile.Seek(from, SEEK_BEGINNING)
-	self.sourceFile.Read(bs)
-	// Todo change it to byte
-	return string(bs), nil
+	self.sourceFile.Read(payload)
+	return payload, nil
 }
 
 // BuildIndex builds a an ofset index from a given file
