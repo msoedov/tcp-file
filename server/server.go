@@ -55,7 +55,7 @@ func do(idx *indexer.Indexer, conn net.Conn) {
 				conn.Write(OkReply)
 				return
 			}
-			log.WithField("payload", str).WithField("Line", line).WithField("err", errP).Info("Received")
+			log.WithField("payload", str).WithField("Line", line).WithField("err", errP).Debug("Received")
 			if errP != nil {
 				conn.Write(ErrReply)
 			} else {

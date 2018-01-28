@@ -95,7 +95,7 @@ func BuildIndex(filePath string) (*Indexer, error) {
 
 // Private utility functions
 
-// If you end up reading this code - do you like to hear a TCP/IP Joke? :)
+// If you end up reading this code - would you like to hear a TCP/IP Joke? :)
 // https://twitter.com/KirkBater/status/953673704734683136
 func writeInt32(buf io.Writer, n int64) (err error) {
 	payload := make([]byte, SIZE_OF_INT64)
