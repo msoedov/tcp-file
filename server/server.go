@@ -1,10 +1,8 @@
-package main
+package server
 
 import (
 	"bufio"
 	"errors"
-	"flag"
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -14,32 +12,13 @@ import (
 )
 
 var (
-	portPointer        = flag.String("p", "3333", "Port")
 	errMalformedPacket = errors.New("Malformed packed")
+	errQuit            = errors.New("Quit cmd")
 	ErrReply           = []byte("ERR\r\n")
 	OkReply            = []byte("OK\r\n")
+	CmdQuit            = "QUIT"
+	CmdGet             = "GET"
 )
-
-func main() {
-	flag.Parse()
-	l, err := net.Listen("tcp", ":"+*portPointer)
-	if err != nil {
-		log.Fatalf("Error listening: %s", err.Error())
-	}
-	defer l.Close()
-	idx, err := indexer.BuildIndex("main.go")
-	if err != nil {
-		log.Fatalf("Failed to create index %v\n", err)
-	}
-	fmt.Println("Listening on " + "0.0.0.0:" + *portPointer)
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			log.Fatalf("Error accepting: %s", err.Error())
-		}
-		go do(idx, conn)
-	}
-}
 
 // Run run the server
 func Run(hostPort string, servedFile string) {
@@ -72,6 +51,10 @@ func do(idx *indexer.Indexer, conn net.Conn) {
 		}
 		if len(str) > 0 {
 			line, errP := parseInt(str)
+			if errP == errQuit {
+				conn.Write(OkReply)
+				return
+			}
 			log.WithField("payload", str).WithField("Line", line).WithField("err", errP).Info("Received")
 			if errP != nil {
 				conn.Write(ErrReply)
@@ -89,11 +72,14 @@ func do(idx *indexer.Indexer, conn net.Conn) {
 }
 
 func parseInt(line string) (int64, error) {
-	cmd := "GET"
-	for i, char := range cmd {
-		if rune(line[i]) != char {
-			return -1, errMalformedPacket
-		}
+	if len(line) < 4 {
+		return -1, errMalformedPacket
+	}
+	if line[:4] == CmdQuit {
+		return -1, errQuit
+	}
+	if line[:3] != CmdGet {
+		return -1, errMalformedPacket
 	}
 	if line[3] != " "[0] {
 		return -1, errMalformedPacket
