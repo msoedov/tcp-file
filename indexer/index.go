@@ -74,13 +74,10 @@ func BuildIndex(filePath string) (*Indexer, error) {
 	}
 	defer idxFile.Close()
 	indexWritter := bufio.NewWriter(idxFile)
-
-	index := make(map[int64]int64)
 	var line, offsetBytes int64
 	line = 1
 	scanner := bufio.NewScanner(sourceFile)
 	for scanner.Scan() {
-		index[line] = offsetBytes
 		err := writeInt32(indexWritter, offsetBytes)
 		if err != nil {
 			return nil, err
